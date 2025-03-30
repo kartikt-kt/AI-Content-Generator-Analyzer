@@ -1,0 +1,2 @@
+HUGGINGFACE_API_KEY= your api key here
+DATABASE_URL=postgresql://postgres:passwordhere@localhost:portnumberhere/database_name
