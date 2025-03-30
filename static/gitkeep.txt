@@ -1,0 +1,2 @@
+# This file exists to maintain the static directory in Git
+# You can place static assets like CSS, JavaScript, and images in this directory
