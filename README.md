@@ -39,7 +39,7 @@ A modern web application that generates and analyzes content using state-of-the-
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ai-content-analyzer.git
+git clone https://github.com/kartik-kt/ai-content-analyzer.git
 cd ai-content-analyzer
 ```
 
