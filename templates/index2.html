@@ -118,7 +118,7 @@
             display: none;
         }
 
-        #generated-content {
+        .content-display {
             white-space: pre-wrap;
             background-color: var(--secondary-color);
             padding: 1rem;
@@ -126,6 +126,8 @@
             margin-top: 1rem;
             font-size: 0.875rem;
             line-height: 1.6;
+            position: relative;
+            display: none;
         }
 
         .analysis-badge {
@@ -162,6 +164,13 @@
 
         .copy-button:hover {
             opacity: 1;
+        }
+
+        .results-container {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
         }
     </style>
 </head>
@@ -206,6 +215,14 @@
                 <p>Generating content...</p>
             </div>
             <div class="error-message" id="content-error"></div>
+            <div class="results-container" id="generation-results">
+                <div class="section-title">Generated Content</div>
+                <div class="content-display" id="generated-content">
+                    <button class="copy-button" id="copy-content" title="Copy to clipboard">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="section" id="analysis-section">
@@ -236,29 +253,18 @@
                 <p>Analyzing content...</p>
             </div>
             <div class="error-message" id="analysis-error"></div>
-        </div>
-
-        <div class="section" id="result-section">
-            <div class="section-title">
-                <i class="fas fa-file-alt"></i>
-                Results
-            </div>
-            <div class="position-relative">
-                <button class="copy-button" id="copy-content" title="Copy to clipboard">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <div id="generated-content"></div>
-            </div>
-            
-            <div class="mt-4">
-                <span class="analysis-badge readability-badge">
-                    <i class="fas fa-book-reader"></i>
-                    Readability: <span id="readability"></span>
-                </span>
-                <span class="analysis-badge sentiment-badge">
-                    <i class="fas fa-heart"></i>
-                    Sentiment: <span id="sentiment"></span>
-                </span>
+            <div class="results-container" id="analysis-results">
+                <div class="section-title">Analysis Results</div>
+                <div class="d-flex gap-3">
+                    <span class="analysis-badge readability-badge">
+                        <i class="fas fa-book-reader"></i>
+                        Readability: <span id="readability"></span>
+                    </span>
+                    <span class="analysis-badge sentiment-badge">
+                        <i class="fas fa-heart"></i>
+                        Sentiment: <span id="sentiment"></span>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -270,9 +276,12 @@
             const topic = document.getElementById('topic').value;
             const loading = document.getElementById('content-loading');
             const error = document.getElementById('content-error');
+            const results = document.getElementById('generation-results');
+            const content = document.getElementById('generated-content');
             
             loading.style.display = 'block';
             error.style.display = 'none';
+            results.style.display = 'none';
             
             try {
                 const response = await fetch('/generate/', {
@@ -283,8 +292,9 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    document.getElementById('generated-content').innerText = data.generated_text;
-                    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+                    content.innerText = data.generated_text;
+                    content.style.display = 'block';
+                    results.style.display = 'block';
                 } else {
                     error.innerText = data.generated_text;
                     error.style.display = 'block';
@@ -302,9 +312,11 @@
             const content = document.getElementById('content').value;
             const loading = document.getElementById('analysis-loading');
             const error = document.getElementById('analysis-error');
+            const results = document.getElementById('analysis-results');
             
             loading.style.display = 'block';
             error.style.display = 'none';
+            results.style.display = 'none';
             
             try {
                 const response = await fetch('/analyze/', {
@@ -317,7 +329,7 @@
                 if (data.success) {
                     document.getElementById('readability').innerText = data.readability;
                     document.getElementById('sentiment').innerText = data.sentiment;
-                    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+                    results.style.display = 'block';
                 } else {
                     error.innerText = 'An error occurred while analyzing content.';
                     error.style.display = 'block';
@@ -349,3 +361,4 @@
     </script>
 </body>
 </html>
+
