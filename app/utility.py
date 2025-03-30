@@ -203,6 +203,17 @@ def get_sentiment_analysis(content: str) -> str:
         if len(content) > max_length:
             content = content[:max_length] + "..."
             
+        # List of words indicating negative context even in academic writing
+        negative_context_words = [
+            "war", "conflict", "death", "devastat", "catastroph", "brutal", "bloody", "disease",
+            "collapse", "suffering", "casualties", "killed", "deaths", "dead", "destruction",
+            "damage", "tragic", "crisis", "disaster", "terror", "violence", "genocide"
+        ]
+        
+        # Check for presence of negative context words
+        content_lower = content.lower()
+        negative_context_count = sum(1 for word in negative_context_words if word in content_lower)
+        
         response = query({
             "inputs": content
         }, SENTIMENT_API_URL)
@@ -217,10 +228,18 @@ def get_sentiment_analysis(content: str) -> str:
             label = highest_sentiment['label'].upper()
             score = highest_sentiment['score']
             
+            # If there are multiple negative context words, bias towards negative
+            if negative_context_count >= 3:
+                if score < 0.8:  # Require very high confidence to override negative context
+                    return "Negative"
+            
             # Convert label to sentiment with confidence threshold
             if score < 0.6:  # If confidence is low, consider it neutral
                 return "Neutral"
             elif label == 'POSITIVE':
+                # Double check positive sentiment if negative context words are present
+                if negative_context_count >= 2:
+                    return "Negative"  # Override positive if strong negative context
                 return "Positive"
             elif label == 'NEGATIVE':
                 return "Negative"
@@ -228,5 +247,8 @@ def get_sentiment_analysis(content: str) -> str:
                 return "Neutral"
         return "Neutral"
     except Exception as e:
-        print(f"Sentiment analysis error: {str(e)}")  # Debug print
+        error_msg = str(e)
+        print(f"Sentiment analysis error: {error_msg}")  # Debug print
+        if "loading" in error_msg.lower() or "initializing" in error_msg.lower():
+            return "Model is loading, please try again in a few moments"
         return "Unable to analyze sentiment"
